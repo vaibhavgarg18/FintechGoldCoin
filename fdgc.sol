@@ -589,7 +589,6 @@ contract FintechDigitalGoldCoin is BasicMetaTransaction, Initializable {
     string public constant name = "FINTECH DIGITAL GOLD COIN"; // solium-disable-line
     string public constant symbol = "FDGC"; // solium-disable-line uppercase
     uint8 public constant decimals = 6; // solium-disable-line uppercase
-    uint256 public maxSupply;
 
     // ERC20 DATA
     mapping(address => mapping(address => uint256)) internal allowed;
