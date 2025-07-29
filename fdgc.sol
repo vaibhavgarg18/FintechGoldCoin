@@ -578,7 +578,7 @@ abstract contract Initializable {
     }
 }
 pragma solidity ^ 0.8.11;
-contract FintechGoldCoin is BasicMetaTransaction, Initializable {
+contract FintechDigitalGoldCoin is BasicMetaTransaction, Initializable {
     using SafeMath
     for uint256;
 
@@ -586,7 +586,7 @@ contract FintechGoldCoin is BasicMetaTransaction, Initializable {
 
     mapping(address => uint256) internal balances;
     uint256 internal totalSupply_;
-    string public constant name = "Fintech Gold Coin"; // solium-disable-line
+    string public constant name = "FINTECH DIGITAL GOLD COIN"; // solium-disable-line
     string public constant symbol = "FDGC"; // solium-disable-line uppercase
     uint8 public constant decimals = 6; // solium-disable-line uppercase
     uint256 public maxSupply;
@@ -693,7 +693,7 @@ contract FintechGoldCoin is BasicMetaTransaction, Initializable {
         feeController = _owner;
         feeRecipient = _owner;
         initializeDomainSeparator();
-        maxSupply = 100000000 * (10 ** uint256(decimals)); //100 million tokens
+        maxSupply = 315000 * (10 ** uint256(decimals));
         initialized = true;
     }
 
