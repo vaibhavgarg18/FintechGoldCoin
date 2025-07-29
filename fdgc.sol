@@ -605,8 +605,6 @@ contract FintechDigitalGoldCoin is BasicMetaTransaction, Initializable {
     address public assetProtectionRole;
     mapping(address => bool) internal frozen;
 
-    // SUPPLY CONTROL DATA
-    address public supplyController;
 
     // DELEGATED TRANSFER DATA
     address public betaDelegateWhitelister;
@@ -652,12 +650,6 @@ contract FintechDigitalGoldCoin is BasicMetaTransaction, Initializable {
         address indexed oldAssetProtectionRole,
         address indexed newAssetProtectionRole
     );
-    event SupplyIncreased(address indexed to, uint256 value);
-    event SupplyDecreased(address indexed from, uint256 value);
-    event SupplyControllerSet(
-        address indexed oldSupplyController,
-        address indexed newSupplyController
-    );
     event BetaDelegatedTransfer(
         address indexed from,
         address indexed to,
@@ -687,13 +679,20 @@ contract FintechDigitalGoldCoin is BasicMetaTransaction, Initializable {
         owner = _owner;
         proposedOwner = address(0);
         assetProtectionRole = address(0);
-        totalSupply_ = 0;
-        supplyController = _owner;
         feeRate = 0;
         feeController = _owner;
         feeRecipient = _owner;
+
+        // Set a fixed total supply of 315,000 tokens
+        uint256 initialSupply = 315000 * (10 ** uint256(decimals));
+        totalSupply_ = initialSupply;
+        
+        // Assign all tokens to the owner's balance
+        balances[_owner] = initialSupply;
+        // Emit the standard ERC20 event for token creation
+        emit Transfer(address(0), _owner, initialSupply);
+
         initializeDomainSeparator();
-        maxSupply = 315000 * (10 ** uint256(decimals));
         initialized = true;
     }
 
@@ -884,52 +883,11 @@ contract FintechDigitalGoldCoin is BasicMetaTransaction, Initializable {
         balances[_addr] = 0;
         totalSupply_ = totalSupply_.sub(_balance);
         emit FrozenAddressWiped(_addr);
-        emit SupplyDecreased(_addr, _balance);
         emit Transfer(_addr, address(0), _balance);
     }
 
     function isFrozen(address _addr) public view returns(bool) {
         return frozen[_addr];
-    }
-
-    function setSupplyController(address _newSupplyController) public {
-        require(
-            _msgSender() == supplyController || _msgSender() == owner,
-            "only SupplyController or Owner"
-        );
-        require(
-            _newSupplyController != address(0),
-            "cannot set supply controller to address zero"
-        );
-        emit SupplyControllerSet(supplyController, _newSupplyController);
-        supplyController = _newSupplyController;
-    }
-
-    modifier onlySupplyController() {
-        require(_msgSender() == supplyController, "onlySupplyController");
-        _;
-    }
-
-    function increaseSupply(
-        uint256 _value
-    ) public onlySupplyController returns(bool success) {
-        require(totalSupply_.add(_value) <= maxSupply, "Exceeds maximum supply");
-        totalSupply_ = totalSupply_.add(_value);
-        balances[supplyController] = balances[supplyController].add(_value);
-        emit SupplyIncreased(supplyController, _value);
-        emit Transfer(address(0), supplyController, _value);
-        return true;
-    }
-
-    function decreaseSupply(
-        uint256 _value
-    ) public onlySupplyController returns(bool success) {
-        require(_value <= balances[supplyController], "not enough supply");
-        balances[supplyController] = balances[supplyController].sub(_value);
-        totalSupply_ = totalSupply_.sub(_value);
-        emit SupplyDecreased(supplyController, _value);
-        emit Transfer(supplyController, address(0), _value);
-        return true;
     }
 
     function nextSeqOf(address target) public view returns(uint256) {
